@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+src/assistant/__init__.py
+src/assistant/__main__.py
+src/assistant/config.py
+src/assistant/errors.py
+src/assistant/responder.py
+src/assistant/rules.py
+src/assistant_core.egg-info/PKG-INFO
+src/assistant_core.egg-info/SOURCES.txt
+src/assistant_core.egg-info/dependency_links.txt
+src/assistant_core.egg-info/requires.txt
+src/assistant_core.egg-info/top_level.txt
+tests/test_responder.py
+tests/test_smoke.py
