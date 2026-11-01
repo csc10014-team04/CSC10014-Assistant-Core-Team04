@@ -68,6 +68,10 @@ def create_app(
         # TODO T1 (2 lines):
         #   1. resp = service.handle(Message(text=req.message, session_id=req.session_id))
         #   2. return ChatResponse(**resp.model_dump(), request_id=uuid.uuid4().hex[:12])
+        client = request.client.host if request.client else "unknown"
+        if not limiter.allow(client):
+            raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Too many requests")
+    
         resp = service.handle(Message(text=req.message, session_id=req.session_id))
         return ChatResponse(**resp.model_dump(), request_id=uuid.uuid4().hex[:12])
 
