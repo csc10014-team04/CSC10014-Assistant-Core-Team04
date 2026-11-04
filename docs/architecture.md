@@ -45,3 +45,19 @@ AssistantService.handle(msg: Message) -> Response
    - *Reason*: Decoupling the assistant core from third-party LLM providers via a `Responder` Protocol allows running tests, CI/CD pipelines, and local development offline without API keys using `StubLLMResponder`. Switching to an actual LLM provider in Week 4 requires no changes to `AssistantService`.
 3. **Twelve-Factor Configuration Management (`config.py` & `.env.example`)**:
    - *Reason*: In accordance with Factor III of The Twelve-Factor App, configuration is strictly decoupled from code and read from environment variables (or `.env`). Using `repr=False` on sensitive fields like `llm_api_key` ensures secrets never leak into logs or error traces.
+
+## 4. REST API layer (Lab 4)
+
+`assistant_api` is a thin FastAPI layer over `AssistantService.handle()`. It adds HTTP concerns only
+(validation, status codes, one error shape, admin key, rate limit) and contains no business logic.
+
+| Module | Responsibility |
+|---|---|
+| `schemas.py` | Pydantic request/response contract (`ChatRequest`, `ChatResponse`, `FeedbackIn/Out`, `OfficeOut`, `Weather`, `ErrorResponse`) |
+| `main.py` | `create_app()` factory; routes `/health`, `/v1/chat`, `/v1/feedback`, `/v1/offices`, `/v1/weather` |
+| `ratelimit.py` | per-client limiter used by `/v1/chat` (429) |
+| `weather.py` | external weather client with timeout, one retry, cached fallback |
+
+Decisions: `create_app()` receives its dependencies so tests inject a fake service and a mocked weather site
+(no network); feedback is held in memory until Lab 5 adds a database; all errors use
+`{"error": {"code", "message"}}`.
