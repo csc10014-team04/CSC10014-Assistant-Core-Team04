@@ -100,4 +100,7 @@ def create_app(
         except ExternalServiceError:
             raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Weather service unavailable") from None
 
+    @app.get("/v1/offices", tags=["directory"])
+    def list_offices() -> list[dict]:
+        return [o.__dict__ for o in service.offices.all()]
     return app
