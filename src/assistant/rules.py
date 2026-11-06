@@ -1,4 +1,5 @@
 """A tiny rule-based responder. No AI yet — that comes in Week 4."""
+
 from __future__ import annotations
 
 import csv
