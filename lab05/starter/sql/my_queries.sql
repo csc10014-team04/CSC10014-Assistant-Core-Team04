@@ -17,12 +17,3 @@ JOIN feedback AS f ON f.request_id = i.request_id
 WHERE f.rating = -1
 GROUP BY i.topic
 ORDER BY thumbs_down DESC;
-
--- H2: What share of answers used a backup path (degraded = 1)?
-SELECT COUNT(*) AS total,
-       SUM(degraded) AS degraded_count,
-       ROUND(100.0 * SUM(degraded) / COUNT(*), 2) AS degraded_pct
-FROM interaction;
--- Result on seeded assistant.db (300 rows):
--- total | degraded_count | degraded_pct
--- 300   | 38             | 12.67
