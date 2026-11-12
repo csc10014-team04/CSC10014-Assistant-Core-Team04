@@ -18,38 +18,39 @@ def students_in_program(con: sqlite3.Connection, program: str) -> list[str]:
 
 def add_student(con: sqlite3.Connection, name: str, year: int, program: str) -> int:
     """Insert a student and return the new id."""
-    # TODO D1: cur = con.execute("INSERT INTO students (name, year, program) VALUES (?, ?, ?)", (name, year, program))
-    #          con.commit(); return cur.lastrowid
     cur = con.execute(
-        "INSERT INTO students (name, year, program) VALUES (?, ?, ?)", 
+        "INSERT INTO students (name, year, program) VALUES (?, ?, ?)",
         (name, year, program)
     )
-    con.commit(); 
+    con.commit()
     return cur.lastrowid
-    raise NotImplementedError
 
 
 def average_grade(con: sqlite3.Connection, course_code: str) -> float | None:
     """Average grade in a course (ignoring NULL), rounded to 2 decimals; None if no grades."""
-    row = con.execute(
+    cur = con.execute(
         "SELECT AVG(grade) FROM enrollments WHERE course_code = ?",
-        (course_code,),
-    ).fetchone()
-    return None if row[0] is None else round(row[0], 2)
-    raise NotImplementedError
+        (course_code,)
+    )
+    result = cur.fetchone()[0]
+
+    return round(result, 2) if result is not None else None
 
 
 def transcript(con: sqlite3.Connection, student_id: int) -> list[tuple[str, int, float | None]]:
     """(course title, credits, grade) for one student, sorted by title. Needs a JOIN."""
-    rows = con.execute(
+    cur = con.execute(
         """
-        SELECT c.title, c.credits, e.grade
-        FROM enrollments AS e
-        JOIN courses AS c ON e.course_code = c.code
-        WHERE e.student_id = ?
-        ORDER BY c.title
+        SELECT courses.title, courses.credits, enrollments.grade
+        FROM enrollments
+        JOIN courses ON enrollments.course_code = courses.code
+        WHERE enrollments.student_id = ?
+        ORDER BY courses.title
         """,
-        (student_id,),
-    ).fetchall()
-    return [tuple(r) for r in rows]
-    raise NotImplementedError
+        (student_id,)
+    )
+
+    return [
+        (title, credits, float(grade) if grade is not None else None)
+        for title, credits, grade in cur.fetchall()
+    ]
