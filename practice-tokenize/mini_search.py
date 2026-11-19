@@ -2,16 +2,14 @@
 
 No AI here — just dictionaries, sets and sorting (DSA!). Run the tests:  pytest -q test_mini_search.py
 """
-from operator import index
 import re
-
-from sqlalchemy import text
 
 DOCS = {
     "D1": "Students may register a thesis with at least 120 credits and a GPA of 2.0.",
     "D2": "Retake credits are charged at 1.5 times the normal credit rate.",
     "D3": "A lost student card can be replaced at Student Affairs in room I.102.",
     "D4": "Students may borrow up to 5 books from the library for 14 days.",
+
 }
 STOP = {"a", "an", "the", "at", "of", "for", "to", "in", "can", "be", "is", "my", "i", "may", "with", "and", "up", "from"}
 
@@ -40,8 +38,8 @@ def search(index: dict[str, set[str]], query: str, k: int = 2) -> list[tuple[str
     highest score first; ties broken by doc_id. Documents with score 0 are not returned."""
     scores: dict[str, int] = {}
     # TODO S2: for each word in tokenize(query): for each doc_id in index.get(word, set()): scores[doc_id] += 1
-    # TODO S3: sort by (-score, doc_id) and return the first kscores: dict[str, int] = {}
     for word in tokenize(query):
-        for doc_id in index.get(word, set()):
-            scores[doc_id] = scores.get(doc_id, 0) + 1
-    return sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:k]
+        for doc_id in index.get(word,set()):
+            scores[doc_id]=scores.get(doc_id,0)+1
+    # TODO S3: sort by (-score, doc_id) and return the first k
+    return  sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:k]
