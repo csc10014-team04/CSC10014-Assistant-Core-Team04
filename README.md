@@ -1,115 +1,49 @@
-# CSC10014 Smart Virtual Assistant - Team 04
-
-A study assistant for university students. It answers questions about offices, tuition fees and
-handbook rules. The project grows lab by lab: a rule-based starter (`assistant`), a maintainable
-service (`assistant_core`, Lab 3) and a REST API on top of it (`assistant_api`, Lab 4).
-The AI part is still a stub.
-
-## Prerequisites
-
-- Python 3.10 or newer
-- Git
+# Study Assistant — backend (Lab 6 reference)
 
 ## Setup
-
-macOS / Linux / Git Bash:
-
-```bash
-git clone git@github.com:csc10014-team04/CSC10014-Assistant-Core-Team04.git
-cd CSC10014-Assistant-Core-Team04
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-pip install -e .
+```
+python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
+pip install -r requirements.txt && pip install -e .
 cp .env.example .env
 ```
-
-Windows PowerShell:
-
-```powershell
-git clone git@github.com:csc10014-team04/CSC10014-Assistant-Core-Team04.git
-cd CSC10014-Assistant-Core-Team04
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-pip install -e .
-copy .env.example .env
+## Run the API
 ```
-
-Check the setup: `python scripts/check_env.py` - every line should be `[ OK ]`.
-
-## Run
-
-Lab 1 rule-based starter:
-
-```bash
-python -m assistant "where is the training office?"
-# -> Training Office: room I.101, open Mon-Fri 07:30-16:30.
-```
-
-Lab 3 service (CLI, logs go to stderr, answers to stdout):
-
-```bash
-python -m assistant_core "tuition for 18 credits and 2 retake"
-# -> Your tuition is 9,450,000 VND.
-```
-
-Lab 4 REST API (interactive docs at http://127.0.0.1:8000/docs):
-
-```bash
 uvicorn assistant_api.main:create_app --factory --reload
 ```
+Open http://127.0.0.1:8000/docs for the interactive OpenAPI documentation.
 
-## Test
+## API contract (v1)
+| Method | Path | Body | Success | Errors |
+|---|---|---|---|---|
+| GET | `/health` | — | 200 `{"status":"ok","version":...}` | — |
+| POST | `/v1/chat` | `{"message": str 1–2000, "session_id": str}` | 200 `{answer, intent, sources[], degraded, request_id}` | 422 invalid, 429 rate limit |
+| POST | `/v1/feedback` | `{"request_id": str, "rating": -1/0/1, "comment"?: str ≤500}` | 201 feedback with `id`, `created_at` | 422 |
+| GET | `/v1/feedback` | header `X-API-Key` | 200 list | 401 |
+| GET | `/v1/stats/intents` | header `X-API-Key` | 200 `[{intent, requests, avg_latency_ms, unresolved}]` | 401 |
+| GET | `/v1/weather` | — | 200 `{temperature_c, wind_kmh, description, observed_at, stale}` | 503 upstream down |
 
-```bash
-pytest -q          # expected: all tests pass (offline, no API key needed)
-ruff check .       # expected: All checks passed!
-bash api-tests/curl_tests.sh   # manual API checks, needs the server running
+All errors use one shape: `{"error": {"code": "...", "message": "..."}}`.
+
+## Database (Lab 5)
 ```
+python scripts/migrate.py assistant.db      # apply sql/migrations in order
+python scripts/seed.py assistant.db 300     # synthetic data only
+sqlite3 assistant.db < sql/queries.sql      # the five queries + product questions
+```
+New endpoint: `GET /v1/stats/intents` (header `X-API-Key`). `POST /v1/feedback` now returns 404 for an unknown `request_id`.
 
-## API (v1)
+## AI services (Lab 6)
+Knowledge base: `data/kb/*.md` (chunked by heading). Prompt: `src/assistant_core/prompts/answer_v1.txt`.
+```
+LLM_PROVIDER=stub python -m assistant_core "I lost my student card"      # offline
+LLM_PROVIDER=ollama LLM_MODEL=llama3.2 python -m assistant_core "..."     # local model (ollama pull llama3.2)
+python eval/compare_paths.py                                              # deterministic vs retrieval vs LLM
+```
+`/v1/chat` responses now include `path` (deterministic | retrieval | llm | tool | abstain), `escalate` and `confidence`.
 
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/health` | liveness check |
-| POST | `/v1/chat` | `{"message": "...", "session_id": "..."}`; 422 on bad input, 429 when rate limited |
-| POST | `/v1/feedback` | rating -1 / 0 / 1; returns 201 |
-| GET | `/v1/feedback` | admin only, header `X-API-Key` |
-| GET | `/v1/offices` | all offices, sorted by name |
-| GET | `/v1/weather` | campus weather; 503 if the upstream is down |
-
-Every error has one shape: `{"error": {"code": "...", "message": "..."}}`.
-
-## Project structure
-
-| Path | Purpose |
-|---|---|
-| `src/assistant/` | Lab 1 rule-based starter |
-| `src/assistant_core/` | Lab 3 service: config, models, router, knowledge, tools, responder, service, logging |
-| `src/assistant_api/` | Lab 4 FastAPI app, schemas, rate limiter, weather client |
-| `tests/` | pytest tests for all packages |
-| `data/` | `offices.csv`, `handbook.json` and their owners (`data/README.md`) |
-| `docs/` | architecture note, team page, per-lab worksheets (`docs/lab1` ... `docs/lab4`) |
-| `api-tests/` | curl script and Postman collection |
-| `practice/` | Lab 4 warm-up API (P1-P5) |
-| `scripts/` | `check_env.py` |
-| `ui/` | UI plan (Week 7) |
-| `.github/` | PR and issue templates |
-
-## Working agreement
-
-Every change starts as an issue, lives on a branch, and merges through a reviewed pull request.
-See [DEFINITION_OF_DONE.md](DEFINITION_OF_DONE.md) and [REVIEW_CHECKLIST.md](REVIEW_CHECKLIST.md).
-
-## Troubleshooting
-
-- `No module named assistant` / `assistant_core` -> activate `.venv` and run `pip install -e .`.
-- PowerShell blocks `Activate.ps1` -> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
-- `uvicorn: command not found` -> activate `.venv`; run `pip install -r requirements.txt`.
-- `Error loading ASGI app` -> run from the repository root and keep `--factory`.
-- `Address already in use` -> stop the other server or add `--port 8001`.
-- `/v1/weather` always 503 -> the network blocks the weather site; the tests use a fake one.
-- `DataError: office file not found` -> run from the repository root or set `ASSISTANT_DATA_DIR`.
+## Tests
+```
+pytest -q                          # unit + API tests (external API mocked)
+bash api-tests/curl_tests.sh       # manual tests against a running server
+```
+Postman / Bruno: import `api-tests/study-assistant.postman_collection.json`.

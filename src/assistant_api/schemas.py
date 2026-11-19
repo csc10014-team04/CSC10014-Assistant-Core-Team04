@@ -19,6 +19,9 @@ class ChatResponse(BaseModel):
     intent: Intent
     sources: list[Source] = []
     degraded: bool = False
+    escalate: bool = False
+    path: str = "deterministic"
+    confidence: float | None = None
     request_id: str
 
 
@@ -39,12 +42,6 @@ class Weather(BaseModel):
     description: str
     observed_at: str
     stale: bool = False  # True when served from cache after an upstream failure
-
-
-class OfficeOut(BaseModel):
-    name: str
-    room: str
-    hours: str
 
 
 class ErrorBody(BaseModel):

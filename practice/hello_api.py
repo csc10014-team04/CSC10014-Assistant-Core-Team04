@@ -6,7 +6,6 @@ Then open http://127.0.0.1:8000/docs in your browser.
 
 Exercises P1–P5 are in README.md. Each one adds a few lines at the marked place.
 """
-
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
@@ -26,24 +25,11 @@ def hello(name: str) -> dict:
     return {"message": f"Hello, {name}!"}
 
 
-@app.get("/chiikawa/{name}")
-def chiikawa(name: str) -> dict:
-    if name == "Usagi":
-        return {"message": f"{name} once said: Una yaha yaha una"}
-    elif name == "Chiikawa":
-        return {"message": f"{name}: iyaaaaaa"}
-    elif name == "Hachiware":
-        return {"message": f"{name} is happy and positive <3"}
-    elif name == "Momonga":
-        return {"message": f"{name} once said: Miteeeeeeee"}
-    else:
-        return {"message": "Yoroi-san?"}
-
-
 # P3: a query parameter. Visit http://127.0.0.1:8000/square?n=7
 @app.get("/square")
 def square(n: int) -> dict:
     # TODO P3: return {"n": n, "square": n * n}
+    n = 7
     return {"n": n, "square": n * n}
 
 
@@ -68,5 +54,5 @@ def course(code: str) -> dict:
     # TODO P5: if code is not in COURSES, raise HTTPException(status_code=404, detail="Course not found")
     #          otherwise return {"code": code, "name": COURSES[code]}
     if code not in COURSES:
-        raise HTTPException(status_code=404, detail="Course not found")
+       raise HTTPException(status_code=404, detail="Course not found")
     return {"code": code, "name": COURSES[code]}

@@ -1,13 +1,8 @@
 .venv/
-venv/
 __pycache__/
-*.py[cod]
+*.pyc
 .pytest_cache/
 .ruff_cache/
-*.egg-info/
 .env
-.env.*
-!.env.example
-.DS_Store
-.vscode/
-data/raw/
+*.egg-info/
+*.db
