@@ -8,9 +8,7 @@ owner: Training Office
 Students may retake a course they failed or want to improve. Retake credits are charged at 1.5 times the normal credit rate. Final-year students must register retakes before week 2 of the semester.
 
 # 5.3 Thesis registration
-Students may register a thesis when they have at least 120 accumulated credits and a
-cumulative GPA of at least 2.0. Registration opens in week 1 and closes in week 3 of the
-semester.
+Students may register a thesis when they have at least 120 accumulated credits and a cumulative GPA of at least 2.0. Registration opens in week 1 and closes in week 3 of the semester.
 
 # 5.4 Late thesis registration
 Late thesis registration requires written approval from both the Faculty and the proposed supervisor. Requests must be submitted to the Training Office no later than week 5.
