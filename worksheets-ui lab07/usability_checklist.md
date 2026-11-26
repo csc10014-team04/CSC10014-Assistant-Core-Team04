@@ -1,12 +1,12 @@
 # Lab 7 — Usability checklist (tick before your user test)
 
-- [X] The first screen says what the assistant can do, with example questions
-- [X] Empty or too-long input shows a friendly message (not a crash)
-- [X] While waiting, the user sees "Thinking…"
-- [X] Every answer from documents shows its sources
-- [X] "I don't know" answers tell the user who can help (escalation)
-- [X] If the backend is down, the page says so clearly
-- [X] Each answer has 👍 / 👎, and clicking gives a "thanks" message
-- [X] The page says it is an AI assistant
-- [X] Text is readable (size, contrast); buttons have clear labels
-- [X] Works on a phone-width window
+- [x] The first screen says what the assistant can do, with example questions
+- [x] Empty or too-long input shows a friendly message (not a crash)
+- [x] While waiting, the user sees "Thinking…"
+- [x] Every answer from documents shows its sources
+- [x] "I don't know" answers tell the user who can help (escalation)
+- [x] If the backend is down, the page says so clearly
+- [x] Each answer has 👍 / 👎, and clicking gives a "thanks" message
+- [x] The page says it is an AI assistant
+- [x] Text is readable (size, contrast); buttons have clear labels
+- [x] Works on a phone-width window
