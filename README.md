@@ -62,6 +62,12 @@ Lab 4 REST API (interactive docs at http://127.0.0.1:8000/docs):
 uvicorn assistant_api.main:create_app --factory --reload
 ```
 
+Lab 7 Streamlit UI (starts on http://127.0.0.1:8501; requires the API running on port 8000):
+
+```bash
+streamlit run ui/app.py
+```
+
 ## Test
 
 ```bash
@@ -96,7 +102,7 @@ Every error has one shape: `{"error": {"code": "...", "message": "..."}}`.
 | `api-tests/` | curl script and Postman collection |
 | `practice/` | Lab 4 warm-up API (P1-P5) |
 | `scripts/` | `check_env.py` |
-| `ui/` | UI plan (Week 7) |
+| `ui/` | Lab 7 Streamlit chat UI (`app.py`, `api_client.py`, `logic.py`) |
 | `.github/` | PR and issue templates |
 
 ## Working agreement
