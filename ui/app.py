@@ -10,7 +10,16 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # allow ui imports under streamlit
 
 from ui.api_client import AssistantClient
-from ui.logic import EXAMPLES, WELCOME, format_sources, set_rating, status_note, validate_input, word_stream
+from ui.logic import (
+    EXAMPLES,
+    WELCOME,
+    format_sources,
+    reset_chat_state,
+    set_rating,
+    status_note,
+    validate_input,
+    word_stream,
+)
 
 st.set_page_config(page_title="FIT Study Assistant", page_icon="🎓")
 client = AssistantClient(os.getenv("ASSISTANT_API_URL", "http://127.0.0.1:8000"))
@@ -27,6 +36,9 @@ if not client.healthy():
     st.error("The assistant backend is not reachable. Start it with: uvicorn assistant_api.main:create_app --factory")
 
 with st.sidebar:
+    if st.button("New chat", use_container_width=True):
+        reset_chat_state(st.session_state)  # clear messages and start fresh session
+        st.rerun()
     st.subheader("Try an example")
     for example in EXAMPLES:
         if st.button(example, use_container_width=True):

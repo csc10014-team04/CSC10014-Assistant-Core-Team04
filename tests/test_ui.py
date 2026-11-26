@@ -6,7 +6,7 @@ import httpx
 import pytest
 
 from ui.api_client import AssistantClient, ChatResult
-from ui.logic import format_sources, set_rating, status_note, validate_input, word_stream
+from ui.logic import WELCOME, format_sources, reset_chat_state, set_rating, status_note, validate_input, word_stream
 
 OK = {
     "answer": "Room B.201",
@@ -111,7 +111,7 @@ def test_page_loads_and_shows_answer(monkeypatch):
     app_path = str(Path(__file__).resolve().parents[1] / "ui" / "app.py")
     at = AppTest.from_file(app_path, default_timeout=10).run()
     assert not at.exception
-    at.sidebar.button[0].click().run()
+    at.sidebar.button[1].click().run()
     assert not at.exception
     assert any("Room B.201" in m.value for m in at.markdown)
     assert at.expander[0].label.startswith("📄 Sources (1)")
@@ -132,10 +132,49 @@ def test_rating_buttons_stay_and_can_switch(monkeypatch):
     )
     app_path = str(Path(__file__).resolve().parents[1] / "ui" / "app.py")
     at = AppTest.from_file(app_path, default_timeout=10).run()
-    at.sidebar.button[0].click().run()
+    at.sidebar.button[1].click().run()
     up = [b for b in at.button if b.label == "👍"][0]
     up.click().run()
     assert not at.exception
     down = [b for b in at.button if b.label == "👎"][0]
     down.click().run()
     assert sent == [1, -1]
+
+
+def test_reset_chat_state():
+    """Verify H1 reset helper clears messages, ratings, and pending state."""
+    state = {
+        "session_id": "old_session_1",
+        "messages": [{"role": "user", "content": "hi"}],
+        "rated": {"r1": 1},
+        "pending": "queued",
+    }
+    new_sid = reset_chat_state(state)
+    assert new_sid != "old_session_1" and len(new_sid) == 12
+    assert state["session_id"] == new_sid
+    assert state["messages"] == [{"role": "assistant", "content": WELCOME}]
+    assert state["rated"] == {}
+    assert "pending" not in state
+
+
+def test_new_chat_button_clears_history(monkeypatch):
+    """Verify the sidebar New chat button resets the conversation in Streamlit."""
+    pytest.importorskip("streamlit")
+    from streamlit.testing.v1 import AppTest
+
+    monkeypatch.setattr(AssistantClient, "healthy", lambda self: True)
+    monkeypatch.setattr(
+        AssistantClient,
+        "ask",
+        lambda self, m, s: ChatResult(ok=True, answer="Room B.201", request_id="abc123"),
+    )
+    app_path = str(Path(__file__).resolve().parents[1] / "ui" / "app.py")
+    at = AppTest.from_file(app_path, default_timeout=10).run()
+    old_sid = at.session_state["session_id"]
+    # sidebar.button[0] is "New chat"; button[1] is the first example question
+    at.sidebar.button[1].click().run()
+    assert any("Room B.201" in m.value for m in at.markdown)
+    at.sidebar.button[0].click().run()
+    assert not at.exception
+    assert at.session_state["session_id"] != old_sid
+    assert not any("Room B.201" in m.value for m in at.markdown)

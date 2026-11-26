@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+import uuid
 
 from ui.api_client import ChatResult
 
@@ -57,3 +58,13 @@ def set_rating(rated: dict, request_id: str, rating: int) -> bool:
         return False
     rated[request_id] = rating
     return True
+
+
+def reset_chat_state(state: dict) -> str:
+    """Reset conversation history, ratings, and session_id for a fresh chat."""
+    new_session_id = uuid.uuid4().hex[:12]  # assign fresh session id
+    state["session_id"] = new_session_id
+    state["messages"] = [{"role": "assistant", "content": WELCOME}]
+    state["rated"] = {}
+    state.pop("pending", None)
+    return new_session_id
